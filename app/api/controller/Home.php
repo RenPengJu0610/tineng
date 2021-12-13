@@ -23,6 +23,12 @@ class Home extends ApiBaseController
         $this->logic = new HomeLogic();
     }
 
+    /**
+     * 赛程列表
+     * @return \think\response\Json
+     * @date 2021/12/13/9:57
+     * @author RenPengJu
+     */
     public function lists(){
         try {
            $user = $this->getCurrentUser();
