@@ -149,6 +149,7 @@ class Department extends BusBase
 
     public function able($uuid){
         try {
+                
             // 查看要修改的数据是否存在
             $read = $this->model->read($uuid);
             if (!$read){
