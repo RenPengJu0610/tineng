@@ -328,4 +328,33 @@ class Track extends BusBase
         $staff_uuids = $this->staffDepartmentModel->inquiryColumn(['department_uuid' => $department_uuid],'staff_uuid');
         return $staff_uuids;
     }
+
+    public function trackInfo($staff_uuid,$where,$page){
+        $track_uuids = $this->TrackStaffModel->inquiryColumn(['staff_uuid' => $staff_uuid],'track_uuid');
+
+        $data['track'] = $this->model->where($where)->where(['uuid' => $track_uuids])->field('address,demo,start_date,end_date,coach_name_str')->select()->toArray();
+        $coach_name = [];
+        foreach ($data['track'] as $key => $value){
+            if (!empty($value['coach_name_str'])){
+                $coach_name[] = $value['coach_name_str'];
+            }
+        }
+        // 教练的名称
+        $coach_name = implode(',',array_unique($coach_name));
+
+        // 根据人员uuid去人员表中查询信息
+        $staff = Db::name('staff')
+                ->alias('s')
+                ->join('staff_department sd','sd.staff_uuid = s.uuid','left')
+                ->join('department d','d.uuid = sd.department_uuid','left')
+                ->join('sport sp','sp.uuid = s.sport_event_uuid','left')
+                ->where(['s.uuid' => $staff_uuid])
+                ->field('s.name,s.sex,s.birthday,s.sport_event_uuid,sd.department_uuid,d.name as department_name,sp.name as sport_name')
+                ->select()
+                ->toArray();
+        $staff[0]['age'] = 18; // 有转换出生年月日的方法暂时未写，先把年龄写死
+        $staff[0]['coach_name'] = $coach_name;
+        $data['track_head'] = $staff;
+        return $data;
+    }
 }

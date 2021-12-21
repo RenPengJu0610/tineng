@@ -155,7 +155,21 @@ class Track extends ApiBaseController
         return Show::success($track_query);exit();
     }
 
-    public function trackBody(){
-
+    public function trackInfo(){
+        $staff_uuid = $this->request->post('staff_uuid');
+        $search_date = $this->request->post('search_date');
+        $page = $this->request->post('page',1);
+        if (empty($staff_uuid)){
+            return Show::error('参数错误');
+        }
+        $where = [];
+        if (!empty($search_date)){
+            $where[] = ['start_date','<=',$search_date];
+            $where[] = ['end_date','>=',$search_date];
+            //$search_date = 2021-12-15
+            // 2021-12-08 <= $search_date && 2021-12-16 >= $search_date
+        }
+        $data = $this->logic->trackInfo($staff_uuid,$where,$page);
+        return Show::success($data,'OK');
     }
 }
