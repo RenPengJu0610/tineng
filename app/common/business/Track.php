@@ -329,6 +329,18 @@ class Track extends BusBase
         return $staff_uuids;
     }
 
+    /**
+     * 人员行踪详情
+     * @param $staff_uuid
+     * @param $where
+     * @param $page
+     * @return mixed
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @date 2021/12/21/17:23
+     * @author RenPengJu
+     */
     public function trackInfo($staff_uuid,$where,$page){
         $track_uuids = $this->TrackStaffModel->inquiryColumn(['staff_uuid' => $staff_uuid],'track_uuid');
 
