@@ -13,12 +13,14 @@ use think\Exception;
 use app\common\model\mysql\Match as MatchModel;
 use app\common\model\mysql\Department as DepartmentModel;
 use app\common\model\mysql\Annex as AnnexModel;
+use app\common\model\mysql\Track as TrackModel;
 use app\common\model\mysql\MatchProject as MatchProjectModel;
 use think\facade\Db;
 
 class Match extends BusBase
 {
     public $model;
+    public $trackModel;
     public $departmentModel;
     public $annexModel;
     public $matchProjectModel;
@@ -26,6 +28,7 @@ class Match extends BusBase
         $this->model = new MatchModel();
         $this->departmentModel = new DepartmentModel();
         $this->annexModel = new AnnexModel();
+        $this->trackModel = new TrackModel();
         $this->matchProjectModel = new MatchProjectModel();
     }
     public function getCode($param,$step = 1){
@@ -40,6 +43,9 @@ class Match extends BusBase
                     $prefix = 'SC';
                     $max = $this->model->field('max(right(code,4)) code')->select();
                     break;
+                case 2:
+                    $prefix = 'XZ';
+                    $max = $this->trackModel->field('max(right(code,4)) code')->select();
             }
             if (!empty($max)){
                 $max = $max->toArray();
@@ -60,10 +66,14 @@ class Match extends BusBase
         try {
             // 验证code编码唯一性
             if(isset($params['code'])){
+                $step = 1;
                 $codeCount = $this->model->inquiryCount(['code' => $params['code']]);
                     while ($codeCount > 0){
                         $code = $this->getCode(['type' => 1]);
-                        $codeCount = $this->model->inquiryCount(['code' => $code]);
+                        $codeCount = $this->model->inquiryCount(['code' => $code],$step);
+                        if ($codeCount){
+                            $step++;
+                        }
                     }
                     if(!empty($code)){
                         $params['code'] = $code;
@@ -203,5 +213,16 @@ class Match extends BusBase
             throw new Exception($e->getMessage());
         }
         return $ten_project;
+    }
+    public function fileUpload($annex){
+        try {
+            $data = [];
+            $file_name = $annex->getOriginalName();
+            $image_path = \think\facade\Filesystem::disk('public')->putFile('match',$annex);
+
+        }catch (Exception $e){
+            throw new Exception($e->getMessage());
+        }
+        return true;
     }
 }

@@ -107,4 +107,19 @@ class Match extends ApiBaseController
         }
         return Show::success($res,'OK');
     }
+    public function fileupload(){
+        try {
+            $annex = $this->request->file('annex');
+            if (empty($annex)){
+                throw new Exception('参数错误');
+            }
+            $res = $this->logic->fileUpload($annex);
+            if (!$res){
+                throw new Exception('附件上传失败');
+            }
+        }catch(Exception $e){
+            return Show::error($e->getMessage());
+        }
+        return Show::success([],'OK');
+    }
 }

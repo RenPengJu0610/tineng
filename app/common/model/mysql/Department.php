@@ -45,4 +45,40 @@ class Department extends BaseModel
         return $flag;
     }
 
+    /**
+     * 获取其子集
+     * @param $uuid
+     * @param false $all
+     * @return array
+     * @date 2021/12/17/15:20
+     * @author RenPengJu
+     */
+    public function getChildrenUuids($uuid,$all = false){
+        $childrenUuids = [];
+        if ($uuid){
+            if ($all){
+                $childrenUuids = $this->where('department_path','like',"%{$uuid}%")->where(['is_show' => 1])->column('uuid');
+            }else{
+                $childrenUuids = $this->where('department_path','like',"%{$uuid}%")->where(['is_show' => 1,'status' => 1])->column('uuid');
+            }
+        }
+        return array_merge($childrenUuids,[$uuid]);
+    }
+
+    // 获取有效父级
+    public function pickOutDepartmentUuid($department_uuids){
+        $valid_uuid_arr = [];
+        if ($department_uuids){
+            $where['uuid'] = $department_uuids;
+            $where['status'] = 1;
+            $where['is_show'] =1;
+            $departments = $this->where($where)->column('department_path','uuid');
+            foreach ($departments as $key => $val){
+                $departments_path = explode(',',$val);
+                $valid_uuid_arr = array_merge($department_uuids,[$key],$departments_path);
+            }
+        }
+        return array_unique($valid_uuid_arr);
+    }
+
 }
